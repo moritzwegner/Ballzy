@@ -1,23 +1,25 @@
+#include <math.h>
 #include <raylib.h>
 
-struct Ball {
+typedef struct Ball {
 	int posX;
 	int posY;
 	float radius;
-};
+} Ball;
 
-struct Box {
+typedef struct Box {
 	int posX;
 	int posY;
 	const int width;
 	const int height;
 	int count;
-};
+} Box;
 
-struct Cursor {
-	int posX;
-	int posY;
-};
+typedef struct Cursor {
+	double posX;
+	double posY;
+	double radius;
+} Cursor;
 
 int main() {
 	const int screenWidth = 400;
@@ -26,6 +28,8 @@ int main() {
 	const int playgroundStartPosY = screenHeight - playgroundHeight;
 	const int rows = 7;
 	const int columns = 7;
+	const int CURSOR_SIZE = 9;
+	Cursor cursors[CURSOR_SIZE] = { 0 };
 
 	int balls = 1;
 	int round = 1;
@@ -33,6 +37,16 @@ int main() {
 	InitWindow(screenWidth, screenHeight, "Ballzy");
 
 	SetTargetFPS(60);
+
+	Cursor cursor;
+	cursor.posX = screenWidth / 2;
+	cursor.posY = playgroundHeight - 10;
+	cursor.radius = 10;
+
+	Cursor cursor2;
+	cursor2.posX = screenWidth / 2;
+	cursor2.posY = playgroundHeight - 25;
+	cursor2.radius = 5;
 
 	while (!WindowShouldClose())
 	{
@@ -44,6 +58,13 @@ int main() {
 		DrawRectangle(0, 0, screenWidth, screenHeight - playgroundHeight, GRAY);
 
 		// Game Logic
+
+		// Cursor
+		DrawCircle(cursor.posX, cursor.posY, cursor.radius, WHITE);
+		DrawCircle(cursor2.posX, cursor2.posY, cursor2.radius, WHITE);
+
+		DrawCircleLines(screenWidth / 2, playgroundHeight, 100, BLUE);
+
 		// Rows
 		for (int i = playgroundStartPosY; i <= playgroundHeight; i += 50) {
 			DrawLine(0, i, screenWidth, i, RED);
@@ -55,6 +76,21 @@ int main() {
 		}
 
 		Vector2 mousePos = GetMousePosition();
+
+		double angle = atan2(mousePos.y, mousePos.x);
+
+		if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+		{
+			cursor2.posX = cos(angle) * 100.0 + cursor.posX;
+			cursor2.posY = sin(angle) * 100.0 + cursor.posY;
+		}
+
+		for (int i = 0; i < CURSOR_SIZE; i++)
+		{
+			cursors[i].posX = cos(angle) * 100 + cursor.posX - i * 15;
+			cursors[i].posY = sin(angle) * 100 + cursor.posY - i * 15;
+			DrawCircle(cursors[i].posX, cursors[i].posY, i, WHITE);
+		}
 
 		// Draw Footer
 		DrawRectangle(0, playgroundHeight, screenWidth, screenHeight - playgroundHeight, GRAY);

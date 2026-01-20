@@ -4,6 +4,8 @@
 typedef struct Ball {
 	int posX;
 	int posY;
+	int velocityX;
+	int velocityY;
 	float radius;
 } Ball;
 
@@ -28,10 +30,10 @@ int main() {
 	const int playgroundStartPosY = screenHeight - playgroundHeight;
 	const int rows = 7;
 	const int columns = 7;
-	const int CURSOR_SIZE = 9;
-	Cursor cursors[CURSOR_SIZE] = { 0 };
+	const int BALL_SIZE = 10;
+	int BALL_INDEX = 0;
+	Ball balls[BALL_SIZE] = { 0 };
 
-	int balls = 1;
 	int round = 1;
 
 	InitWindow(screenWidth, screenHeight, "Ballzy");
@@ -77,19 +79,33 @@ int main() {
 
 		Vector2 mousePos = GetMousePosition();
 
-		double angle = atan2(mousePos.y, mousePos.x);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			Ball ball_temp;
+			ball_temp.posX = mousePos.x;
+			ball_temp.posY = mousePos.y;
+			ball_temp.velocityX = 10;
+			ball_temp.velocityY = 10;
+			ball_temp.radius = 10;
+			balls[BALL_INDEX] = ball_temp;
+			BALL_INDEX++;
 
-		if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-		{
-			cursor2.posX = cos(angle) * 100.0 + cursor.posX;
-			cursor2.posY = sin(angle) * 100.0 + cursor.posY;
 		}
 
-		for (int i = 0; i < CURSOR_SIZE; i++)
-		{
-			cursors[i].posX = cos(angle) * 100 + cursor.posX - i * 15;
-			cursors[i].posY = sin(angle) * 100 + cursor.posY - i * 15;
-			DrawCircle(cursors[i].posX, cursors[i].posY, i, WHITE);
+		// Update balls
+		for (int i = 0; i <= BALL_INDEX; i++) {
+
+			balls[i].posX += balls[i].velocityX;
+			balls[i].posY += balls[i].velocityY;
+
+			if (balls[i].posX - balls[i].radius <= 0 || balls[i].posX + balls[i].radius >= screenWidth) {
+				balls[i].velocityX *= -1;
+			}
+
+			if (balls[i].posY - balls[i].radius <= playgroundStartPosY || balls[i].posY + balls[i].radius >= playgroundHeight) {
+				balls[i].velocityY *= -1;
+			}
+
+			DrawCircle(balls[i].posX, balls[i].posY, balls[i].radius, WHITE);
 		}
 
 		// Draw Footer
